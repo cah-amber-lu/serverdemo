@@ -1,16 +1,26 @@
-tr, td {
-    border: lightslategray;
-    padding: 30px;
+td {
+}
+
+tr {
+    outline: thin solid;
 }
 
 #listingTableLeft {
     float:left;
-    width:50%;
+    width:45%;
     overflow:hidden;
+    background-color: lightgray;
 }
 
 #listingTableRight {
     float:left;
-    width:50%;
+    width:45%;
     overflow:hidden;
+}
+
+#footer {
+    position:absolute;
+    bottom: 0;
+    width: 90%;
+    height: 2.5rem;
 }

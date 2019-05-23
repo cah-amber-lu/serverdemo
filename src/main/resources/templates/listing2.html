@@ -1,0 +1,41 @@
+<!DOCTYPE HTML>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Test Product Page</title>
+    <link rel="stylesheet" type="text/css" href="/default.css">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<p th:text="'Hello, ' + ${name} + '!'"></p>
+<p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
+<p>This is a sample page that demonstrates frontend API loading.</p>
+<div style="text-align:left">
+    <table id="listingTableLeft">
+        <tr th:each="product : ${products}"
+            th:if="${product.id} % 2 == 0">
+            <td th:text="${product.name}">Name</td>
+            <td th:text="'No. '+ ${product.id}">ID Number</td>
+            <td th:text="'$'+${product.cost}">Cost</td>
+            <td th:text="${product.content}">Content</td>
+        </tr>
+    </table>
+</div>
+
+<div style="text-align: right">
+    <table id="ListingTableRight">
+        <tr th:each="product : ${products}"
+            th:if="${product.id} % 2 == 1">
+            <td th:text="${product.name}">Name</td>
+            <td th:text="'No. '+ ${product.id}">ID Number</td>
+            <td th:text="'$'+${product.cost}">Cost</td>
+            <td th:text="${product.content}">Content</td>
+        </tr>
+    </table>
+</div>
+
+<footer id="footer">
+    <a href="/index.html">Go home</a>
+</footer>
+</body>
+</html>

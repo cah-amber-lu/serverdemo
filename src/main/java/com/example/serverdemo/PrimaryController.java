@@ -7,7 +7,6 @@ import java.util.Random;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -30,8 +29,25 @@ public class PrimaryController {
         return "listing";
     }
 
+    @GetMapping("/listing2")
+    public String listing2(@RequestParam(name="name", required=false, defaultValue="User") String userName,
+                           @RequestParam(name="productName", required=false, defaultValue="All") String productName,
+                           Model model) {
+
+
+        model.addAttribute("name", userName);
+
+        model.addAttribute("productName", productName);
+
+        ProductBunch products = getProducts();
+
+        model.addAttribute("products", products.getProducts());
+
+        return "listing2";
+    }
+
     /**
-     * Get a random number of products between 1 and 10.
+     * Get a random number of products between 2 and 10.
      * URL is set to the Chuck Norris jokes API database.
      */
     private ProductBunch getProducts() {
@@ -43,7 +59,7 @@ public class PrimaryController {
             throw new RuntimeException("Cannot access products at this time.\n");
         }
         Random random = new Random();
-        int numProducts = random.nextInt(10) + 1;
+        int numProducts = random.nextInt(9) + 2;
         return new ProductBunch(numProducts, url);
     }
 

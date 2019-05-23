@@ -7,8 +7,9 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
-    <p th:text="'Welcome, ' + ${name} + '!'"></p>
+    <p th:text="'Hello, ' + ${name} + '!'"></p>
     <p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
+    <p>This is a sample page that demonstrates backend API loading.</p>
     <div style="text-align:left">
         <table id="listingTableLeft">
             <tr th:each="product : ${products}"
@@ -21,7 +22,7 @@
         </table>
     </div>
 
-    <div style="text-align: right;background-color: lightgray">
+    <div style="text-align: right">
         <table id="ListingTableRight">
             <tr th:each="product : ${products}"
                 th:if="${product.id} % 2 == 1">
@@ -33,6 +34,8 @@
         </table>
     </div>
 
-    <a href="/index.html">Go home</a>
+    <footer id="footer">
+        <a href="/index.html">Go home</a>
+    </footer>
 </body>
 </html>
