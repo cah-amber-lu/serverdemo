@@ -36,7 +36,7 @@ public class Parser {
         Gson gson = new Gson();
         Response r = gson.fromJson(readURL(), Response.class);
         p.setName("Test name " + r.type);
-        p.setImageURL(r.value.joke);
+        p.setContent(r.value.joke);
         p.setId(Integer.parseInt(r.value.id));
         p.setCost(Integer.parseInt(r.value.id) + 0.50);
         return p;

@@ -1,9 +1,4 @@
-tr {
+tr, td {
     border: lightslategray;
     padding: 30px;
-}
-
-
-td {
-
 }

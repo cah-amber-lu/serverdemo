@@ -7,19 +7,32 @@ import java.util.Random;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class PrimaryController {
 
-    @GetMapping("/index")
-    public String index(@RequestParam(name="name", required=false, defaultValue="User") String userName, Model model) {
+    @GetMapping("/listing")
+    public String listing(@RequestParam(name="name", required=false, defaultValue="User") String userName,
+                          @RequestParam(name="productName", required=false, defaultValue="All") String productName,
+                          Model model) {
+
+
         model.addAttribute("name", userName);
 
+        model.addAttribute("productName", productName);
+
+        return "listing";
+    }
+
+    @GetMapping("/products")
+    public String products(Model model) {
         ProductBunch products = getProducts();
 
+        model.addAttribute("products", products.getProducts());
 
-        return "index";
+        return "/products";
     }
 
 

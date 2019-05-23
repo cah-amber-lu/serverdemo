@@ -21,7 +21,7 @@ public class JsonTests {
             Assert.assertEquals("Test name success", pr.getName());
             Assert.assertEquals("When Chuck Norris sends in his taxes, he sends blank forms and includes " +
                     "only a picture of himself, crouched and ready to attack. Chuck Norris has not had to pay " +
-                    "taxes, ever.", pr.getImageURL());
+                    "taxes, ever.", pr.getContent());
             Assert.assertEquals(52, pr.getId());
             Assert.assertEquals(52.50, pr.getCost(), 0);
         } catch (MalformedURLException e) {
@@ -32,7 +32,7 @@ public class JsonTests {
             Product pr = p.processObject();
             Assert.assertEquals("Test name success", pr.getName());
             Assert.assertEquals("Jesus can walk on water, but Chuck Norris can swim through land.",
-                    pr.getImageURL());
+                    pr.getContent());
             Assert.assertEquals(531, pr.getId());
             Assert.assertEquals(531.50, pr.getCost(), 0);
         } catch (MalformedURLException e) {
@@ -52,7 +52,7 @@ public class JsonTests {
             for (Product p : pb.getProducts()) {
                 Assert.assertEquals("Test name success", p.getName());
                 System.out.println("Product #" + p.getId());
-                System.out.println("Content: " + p.getImageURL());
+                System.out.println("Content: " + p.getContent());
                 System.out.println("Cost: $" + p.getCost());
                 System.out.println("===========\n");
             }
