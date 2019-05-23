@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public class Parser {
 
-    URL url;
+    private URL url;
 
 
     static class Response {
