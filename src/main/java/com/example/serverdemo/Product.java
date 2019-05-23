@@ -45,4 +45,20 @@ public class Product {
     public double getCost() {
         return cost;
     }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setImageURL(String imageURL) {
+        this.imageURL = imageURL;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setCost(double cost) {
+        this.cost = cost;
+    }
 }

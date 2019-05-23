@@ -1,5 +1,7 @@
 package com.example.serverdemo;
 
+import com.google.gson.Gson;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -13,11 +15,32 @@ public class Parser {
     URL url;
 
 
-    static class Value {
+    static class Response {
+        String type;
+        Value value;
+        String categories;
+    }
 
+    static class Value {
+        String id;
+        String joke;
+    }
+
+    public Parser(URL url) {
+        this.url = url;
     }
 
 
+    public Product processObject() {
+        Product p = new Product();
+        Gson gson = new Gson();
+        Response r = gson.fromJson(readURL(), Response.class);
+        p.setName("Test name " + r.type);
+        p.setImageURL(r.value.joke);
+        p.setId(Integer.parseInt(r.value.id));
+        p.setCost(Integer.parseInt(r.value.id) + 0.50);
+        return p;
+    }
 
     public String readURL() {
         String raw;
