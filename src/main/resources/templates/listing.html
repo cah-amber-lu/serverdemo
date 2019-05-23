@@ -3,21 +3,36 @@
 
 <head> 
     <title>Test Product Page</title>
-    <link rel="stylesheet" href="../static/default.css">
+    <link rel="stylesheet" type="text/css" href="/default.css">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 </head>
 <body>
     <p th:text="'Welcome, ' + ${name} + '!'"></p>
     <p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
-    <table>
-        <tr>
-            <td>Product 1</td>
-            <td>Product 2</td>
-        </tr>
-        <tr>
-            <td>Product 3</td>
-            <td>Product 4</td>
-        </tr>
-    </table>
+    <div style="text-align:left">
+        <table id="listingTableLeft">
+            <tr th:each="product : ${products}"
+            th:if="${product.id} % 2 == 0">
+                <td th:text="${product.name}">Name</td>
+                <td th:text="'No. '+ ${product.id}">ID Number</td>
+                <td th:text="'$'+${product.cost}">Cost</td>
+                <td th:text="${product.content}">Content</td>
+            </tr>
+        </table>
+    </div>
+
+    <div style="text-align: right;background-color: lightgray">
+        <table id="ListingTableRight">
+            <tr th:each="product : ${products}"
+                th:if="${product.id} % 2 == 1">
+                <td th:text="${product.name}">Name</td>
+                <td th:text="'No. '+ ${product.id}">ID Number</td>
+                <td th:text="'$'+${product.cost}">Cost</td>
+                <td th:text="${product.content}">Content</td>
+            </tr>
+        </table>
+    </div>
+
+    <a href="/index.html">Go home</a>
 </body>
 </html>

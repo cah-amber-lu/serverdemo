@@ -1,5 +1,7 @@
 package com.example.serverdemo;
 
+import java.text.DecimalFormat;
+
 public class Product {
     private String name;
     private String content;

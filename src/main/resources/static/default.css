@@ -2,3 +2,15 @@ tr, td {
     border: lightslategray;
     padding: 30px;
 }
+
+#listingTableLeft {
+    float:left;
+    width:50%;
+    overflow:hidden;
+}
+
+#listingTableRight {
+    float:left;
+    width:50%;
+    overflow:hidden;
+}

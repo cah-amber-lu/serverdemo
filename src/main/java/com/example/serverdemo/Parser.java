@@ -36,7 +36,8 @@ public class Parser {
         Gson gson = new Gson();
         Response r = gson.fromJson(readURL(), Response.class);
         p.setName("Test name " + r.type);
-        p.setContent(r.value.joke);
+        /* Truncates the string if it's too long so it looks better. */
+        p.setContent(r.value.joke.substring(0, Math.min(r.value.joke.length(), 30)));
         p.setId(Integer.parseInt(r.value.id));
         p.setCost(Integer.parseInt(r.value.id) + 0.50);
         return p;

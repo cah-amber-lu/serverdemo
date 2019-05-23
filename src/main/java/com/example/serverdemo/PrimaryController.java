@@ -23,18 +23,12 @@ public class PrimaryController {
 
         model.addAttribute("productName", productName);
 
-        return "listing";
-    }
-
-    @GetMapping("/products")
-    public String products(Model model) {
         ProductBunch products = getProducts();
 
         model.addAttribute("products", products.getProducts());
 
-        return "/products";
+        return "listing";
     }
-
 
     /**
      * Get a random number of products between 1 and 10.
