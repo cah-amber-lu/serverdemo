@@ -14,6 +14,11 @@
     <table id="listingTableLeft">
         <tr th:each="product : ${products}"
             th:if="${product.id} % 2 == 0">
+            <script>
+
+            </script>
+            <script type="hidden" id="'p-id' + ${product.id}"></script>
+            <!-- Set product values to be displayed. -->
             <td th:text="${product.name}">Name</td>
             <td th:text="'No. '+ ${product.id}">ID Number</td>
             <td th:text="'$'+${product.cost}">Cost</td>
