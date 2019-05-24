@@ -13,6 +13,25 @@
     <p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
     <p>This is a sample page that demonstrates frontend API loading.</p>
     <a id="pTest">Text</a>
+    <table>
+        <tbody id="tableLeft"></tbody>
+    </table>
+
+    <!--JS Marker-->
+    <script th:inline="javascript">
+        let tableLeft = document.getElementById("tableLeft");
+
+        const temp = JSON.parse("http://api.icndb.com/jokes/random?exclude=explicit");
+        console.log(temp.type);
+        $(pTest).text(temp.type);
+
+        let products = new Array(10);
+
+        for (let i = 0; i < products.length; i++) {
+            products
+        }
+
+    </script>
 <!--
 <div style="text-align:left">
     <table id="listingTableLeft">

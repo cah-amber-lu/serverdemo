@@ -1,10 +1,5 @@
 
 
-const pTest = "pTest";
-$(pTest).text("test successful1");
-$(document).ready(function() {
-    $(pTest).text("test successful");
-});
 
 
 

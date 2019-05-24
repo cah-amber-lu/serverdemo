@@ -32,6 +32,7 @@ public class PrimaryController {
     @GetMapping("/listing2")
     public String listing2(@RequestParam(name="name", required=false, defaultValue="User") String userName,
                            @RequestParam(name="productName", required=false, defaultValue="All") String productName,
+                           @RequestParam(name="numLoaded", required=false, defaultValue="10")
                            Model model) {
 
 
