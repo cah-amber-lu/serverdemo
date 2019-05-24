@@ -5,25 +5,25 @@
     <title>Test Product Page</title>
     <link rel="stylesheet" type="text/css" href="/default.css">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+    <script src="../JS/listing2.js"></script>
 </head>
 <body>
-<p th:text="'Hello, ' + ${name} + '!'"></p>
-<p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
-<p>This is a sample page that demonstrates frontend API loading.</p>
+    <p th:text="'Hello, ' + ${name} + '!'"></p>
+    <p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
+    <p>This is a sample page that demonstrates frontend API loading.</p>
+    <a id="pTest">Text</a>
+<!--
 <div style="text-align:left">
     <table id="listingTableLeft">
-        <tr th:each="product : ${products}"
-            th:if="${product.id} % 2 == 0">
-            <script>
-
-            </script>
-            <script type="hidden" id="'p-id' + ${product.id}"></script>
-            <!-- Set product values to be displayed. -->
+        <tbody id="leftTableBody"></tbody>
+            &lt;!&ndash; Set product values to be displayed. &ndash;&gt;
+            &lt;!&ndash;
             <td th:text="${product.name}">Name</td>
             <td th:text="'No. '+ ${product.id}">ID Number</td>
             <td th:text="'$'+${product.cost}">Cost</td>
             <td th:text="${product.content}">Content</td>
-        </tr>
+            &ndash;&gt;
     </table>
 </div>
 
@@ -31,6 +31,8 @@
     <table id="ListingTableRight">
         <tr th:each="product : ${products}"
             th:if="${product.id} % 2 == 1">
+            <input type="hidden" th:id="'p-id' + ${product.id}" th:value="${product}"/>
+            <script src="../../java/com/example/serverdemo/listing2.js" async></script>
             <td th:text="${product.name}">Name</td>
             <td th:text="'No. '+ ${product.id}">ID Number</td>
             <td th:text="'$'+${product.cost}">Cost</td>
@@ -38,6 +40,7 @@
         </tr>
     </table>
 </div>
+-->
 
 <footer id="footer">
     <a href="/index.html">Go home</a>
