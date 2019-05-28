@@ -5,31 +5,78 @@
     <title>Test Product Page</title>
     <link rel="stylesheet" type="text/css" href="/default.css">
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="../JS/listing2.js"></script>
 </head>
 <body>
     <p th:text="'Hello, ' + ${name} + '!'"></p>
     <p th:text="'Currently showing: ' + ${productName} + ' products'"></p>
     <p>This is a sample page that demonstrates frontend API loading.</p>
-    <a id="pTest">Text</a>
-    <table>
-        <tbody id="tableLeft"></tbody>
-    </table>
-
+    <table id="listingTableLeft"></table>
+    <table id="listingTableRight"></table>
     <!--JS Marker-->
     <script th:inline="javascript">
-        let tableLeft = document.getElementById("tableLeft");
 
-        const temp = JSON.parse("http://api.icndb.com/jokes/random?exclude=explicit");
-        console.log(temp.type);
-        $(pTest).text(temp.type);
-
-        let products = new Array(10);
-
-        for (let i = 0; i < products.length; i++) {
-            products
+        function listingParse() {
+            return new Promise((resolve, reject) =>
+            {
+                $.ajax({
+                    url: "http://api.icndb.com/jokes/random?exclude=explicit",
+                    type: "GET",
+                    cache: false,
+                    datatype: "json",
+                    success: function(result) {
+                        // setTimeout(function(){}, 10000)
+                        resolve(result)
+                    },
+                    error: function(result) {
+                        reject(result)
+                    },
+                    async: true
+                })
+            })
         }
+
+        /*<![CDATA[*/
+        const numLoaded = /*[[${numLoaded}]]*/"Default";
+        /*]]>*/
+
+        for (let i = 0; i < parseInt(numLoaded); i++) {
+
+            let tr = document.createElement('tr');
+            let td = document.createElement('td');
+            let text = document.createTextNode("Currently loading");
+            tr.id = "pid" + i;
+
+            td.append(text);
+            tr.append(td);
+            if (i % 2 === 0) {
+                $("#listingTableLeft").append(tr);
+            } else {
+                $("#listingTableRight").append(tr);
+            }
+
+            listingParse()
+                .then(
+                    function(result) {
+                        let text = "Name: " + result.type + "\nID: " + i + "\n";
+                        $("#pid" + i).text(text);
+                    })
+                .catch(error => $("pid" + i).append(error));
+        }
+
+
+
+        // $.getJSON("http://api.icndb.com/jokes/random?exclude=explicit", function result(){
+        //     $.each(result, function(i, field){
+        //         $(pTest).append(field + " ");
+        //     });
+        // });
+
+        // $(pTest).text("Done");
+        // const formattedText = JSON.stringify(temp, null, '\t');
+
+        // $(pTest).val(temp.value);
 
     </script>
 <!--

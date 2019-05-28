@@ -15,6 +15,7 @@ public class PrimaryController {
     @GetMapping("/listing")
     public String listing(@RequestParam(name="name", required=false, defaultValue="User") String userName,
                           @RequestParam(name="productName", required=false, defaultValue="All") String productName,
+                          @RequestParam(name="numLoaded", required=false, defaultValue="10") String numLoaded,
                           Model model) {
 
 
@@ -22,7 +23,9 @@ public class PrimaryController {
 
         model.addAttribute("productName", productName);
 
-        ProductBunch products = getProducts();
+        model.addAttribute("numLoaded", numLoaded);
+
+        ProductBunch products = getProducts(Integer.parseInt(numLoaded));
 
         model.addAttribute("products", products.getProducts());
 
@@ -32,7 +35,7 @@ public class PrimaryController {
     @GetMapping("/listing2")
     public String listing2(@RequestParam(name="name", required=false, defaultValue="User") String userName,
                            @RequestParam(name="productName", required=false, defaultValue="All") String productName,
-                           @RequestParam(name="numLoaded", required=false, defaultValue="10")
+                           @RequestParam(name="numLoaded", required=false, defaultValue="10") String numLoaded,
                            Model model) {
 
 
@@ -40,9 +43,7 @@ public class PrimaryController {
 
         model.addAttribute("productName", productName);
 
-        ProductBunch products = getProducts();
-
-        model.addAttribute("products", products.getProducts());
+        model.addAttribute("numLoaded", numLoaded);
 
         return "listing2";
     }
@@ -51,7 +52,7 @@ public class PrimaryController {
      * Get a random number of products between 2 and 10.
      * URL is set to the Chuck Norris jokes API database.
      */
-    private ProductBunch getProducts() {
+    private ProductBunch getProducts(int num) {
         URL url;
         try {
             url = new URL("http://api.icndb.com/jokes/random?exclude=explicit");
@@ -59,9 +60,9 @@ public class PrimaryController {
             System.out.println("Issue accessing the URL. Error message: " + e.getMessage());
             throw new RuntimeException("Cannot access products at this time.\n");
         }
-        Random random = new Random();
-        int numProducts = random.nextInt(9) + 2;
-        return new ProductBunch(numProducts, url);
+//        Random random = new Random();
+//        int numProducts = random.nextInt(9) + 2;
+        return new ProductBunch(num, url);
     }
 
 }
