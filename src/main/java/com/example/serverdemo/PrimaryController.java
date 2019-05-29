@@ -18,7 +18,6 @@ public class PrimaryController {
                           @RequestParam(name="numLoaded", required=false, defaultValue="10") String numLoaded,
                           Model model) {
 
-
         model.addAttribute("name", userName);
 
         model.addAttribute("productName", productName);
