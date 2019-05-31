@@ -14,8 +14,6 @@ public class Parser {
 
     private URL url;
 
-
-    //TODO: Look at @bean pattern (getters/setters).
     static class Response {
         String type;
         Value value;
