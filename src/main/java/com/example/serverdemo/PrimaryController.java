@@ -2,6 +2,7 @@ package com.example.serverdemo;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Random;
 
 import org.springframework.stereotype.Controller;
@@ -47,6 +48,20 @@ public class PrimaryController {
         return "listing2";
     }
 
+    @GetMapping("/listing3")
+    public String listing3(Model model) {
+
+        Random r = new Random();
+        ArrayList<Integer> al = new ArrayList<>();
+        for (int i = 0; i < 12; i++) {
+            int id = r.nextInt(547) + 1;
+            model.addAttribute("id" + i, id);
+            al.add(id);
+        }
+        model.addAttribute("id", al);
+
+        return "listing3";
+    }
     /**
      * Get a random number of products between 2 and 10.
      * URL is set to the Chuck Norris jokes API database.
