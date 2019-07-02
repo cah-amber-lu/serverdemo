@@ -1,4 +1,4 @@
-package com.example.serverdemo;
+package com.example.serverdemo.OldMethods;
 
 import com.google.gson.Gson;
 
@@ -14,12 +14,18 @@ public class Parser {
 
     private URL url;
 
+    /**
+     * A class to store the response.
+     */
     static class Response {
         String type;
         Value value;
         String categories;
     }
 
+    /**
+     * A class to store the value.
+     */
     static class Value {
         String id;
         String joke;

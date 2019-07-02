@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<!--    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
-    <title>Shop Homepage</title>
+    <!--    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
+    <title>Listing 1 (Direct Backend Loading)</title>
 
-<!--    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">-->
+    <!--    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">-->
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
@@ -33,7 +33,7 @@
                     <a class="nav-link" href="/index.html">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href=/error.html">Error Page Testing</a>
+                    <a class="nav-link" href="/error.html">Error Page Testing</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Services</a>
@@ -55,8 +55,10 @@
 
             <h1 class="my-4">Shop Name</h1>
             <div class="list-group">
-                <a href="/listingTrizetto" class="list-group-item">Listing 1</a>
-                <a href="/listingTrizetto2" class="list-group-item">Listing 2</a>
+                <a href="/listing" class="list-group-item">Listing 1</a>
+                <a href="/listing2" class="list-group-item">Listing 2</a>
+                <a href="/listing3" class="list-group-item">Listing 3</a>
+                <a href="/listingTrizetto" class="list-group-item">Listing 4</a>
             </div>
 
         </div>
@@ -91,6 +93,25 @@
                 </a>
             </div>
 
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4" th:each="product : ${products}">
+                    <div class="card h-100">
+                        <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="#" th:text="${product.name}"></a>
+                            </h4>
+                            <h5 th:text="${product.cost}"></h5>
+                            <p class="card-text" th:text="${product.content}"></p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
 
     </div>
@@ -101,13 +122,50 @@
 
 </body>
 
-<footer class="py-5 bg-dark">
-    <div class="container">
-        <a href="/index.html" class="m-0 text-center text-white">Home</a>
-    </div>
-    <!-- /.container -->
-</footer>
-
 </html>
 
 
+
+
+
+<!--<!DOCTYPE HTML>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+
+<!--<head>-->
+<!--    <title>Test Product Page</title>-->
+<!--    <link rel="stylesheet" type="text/css" href="/default.css">-->
+<!--    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />-->
+<!--</head>-->
+<!--<body>-->
+<!--<p th:text="'Hello, ' + ${name} + '!'"></p>-->
+<!--<p th:text="'Currently showing: ' + ${productName} + ' products'"></p>-->
+<!--<p>This is a sample page that demonstrates backend API loading.</p>-->
+<!--<div style="text-align:left">-->
+<!--    <table id="listingTableLeft">-->
+<!--        <tr th:each="product : ${products}"-->
+<!--            th:if="${product.id} % 2 == 0">-->
+<!--            <td th:text="${product.name}">Name</td>-->
+<!--            <td th:text="'No. '+ ${product.id}">ID Number</td>-->
+<!--            <td th:text="'$'+${product.cost}">Cost</td>-->
+<!--            <td th:text="${product.content}">Content</td>-->
+<!--        </tr>-->
+<!--    </table>-->
+<!--</div>-->
+
+<!--<div style="text-align: right">-->
+<!--    <table id="ListingTableRight">-->
+<!--        <tr th:each="product : ${products}"-->
+<!--            th:if="${product.id} % 2 == 1">-->
+<!--            <td th:text="${product.name}">Name</td>-->
+<!--            <td th:text="'No. '+ ${product.id}">ID Number</td>-->
+<!--            <td th:text="'$'+${product.cost}">Cost</td>-->
+<!--            <td th:text="${product.content}">Content</td>-->
+<!--        </tr>-->
+<!--    </table>-->
+<!--</div>-->
+
+<!--<footer id="footer">-->
+<!--    <a href="/index.html">Go home</a>-->
+<!--</footer>-->
+<!--</body>-->
+<!--</html>-->

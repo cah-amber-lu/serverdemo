@@ -1,23 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<!--    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>-->
-    <title>Shop Homepage</title>
-
-<!--    <link href="../bootstrap/css/bootstrap.min.css" rel="stylesheet">-->
+    <title>Trizetto Listing</title>
 
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
 
     <link href="/shop-homepage.css" rel="stylesheet">
 </head>
-
 <body>
 
 <!-- Navigation -->
@@ -33,7 +27,7 @@
                     <a class="nav-link" href="/index.html">Home</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href=/error.html">Error Page Testing</a>
+                    <a class="nav-link" href="/error.html">Error Page Testing</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#">Services</a>
@@ -45,6 +39,8 @@
         </div>
     </div>
 </nav>
+
+
 
 <!-- Page Content -->
 <div class="container">
@@ -91,6 +87,30 @@
                 </a>
             </div>
 
+            <div th:each="product : ${products}">
+            </div>
+
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4" th:each="product : ${products}">
+                    <input type="hidden" th:id="productdata" th:productvalue="${product[1]}" th:productcode="${product[0]}">
+                    <input type="hidden" th:onload="makeSingleRequest(${product[1]}, ${product[0]})">
+                    <div class="card h-100">
+                        <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
+                        <div class="card-body">
+                            <h4 class="card-title">
+                                <a href="#" th:id="'pid-title-' + ${product[1]}" th:text="'ID' + ${product[1]}"></a>
+                            </h4>
+                            <h5 th:id="'pid-cost-' + ${product[1]}">Currently Loading...</h5>
+                            <p class="card-text" th:id="'pid-content-' + ${product[1]}"></p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
         </div>
 
     </div>
@@ -99,7 +119,68 @@
 </div>
 <!-- /.container -->
 
-</body>
+<script th:inline="javascript">
+
+    // function makeSingleRequest(code, number) {
+    //     return new Promise((resolve, reject) => {
+    //         $.ajax({
+    //             url: "http://localhost:8080/singleRequestCall?id=" + code + "&num=" + number,
+    //             type: "POST",
+    //             cache: false,
+    //             dataType: "json",
+    //             crossDomain: true,
+    //             success: function(result) {
+    //                 resolve(result)
+    //             },
+    //             error: function(result) {
+    //                 reject(result)
+    //             }
+    //         })
+    //     })
+    // }
+
+    function makeRequest() {
+        /*<![CDATA[*/
+
+        let products = /*[[${productids}]]*/ 'default';
+        console.log(products);
+
+        /*]]>*/
+
+        return new Promise((resolve, reject) => {
+          $.ajax({
+              url: "http://localhost:8080/trizettoCall",
+              data: products,
+              type: "POST",
+              cache: false,
+              datatype: "json",
+              contentType: "application/json; charset=utf-8",
+              crossDomain:true,
+              success: function(result) {
+                  resolve(result)
+              },
+              error: function(result) {
+                  reject(result)
+              }
+          });
+        });
+    }
+
+    makeRequest()
+        .then(
+            function(result) {
+                let l = 0;
+                result.forEach(function(r) {
+                    $("#pid-title-" + l).text(r.lines[0].procedureGroup);
+                    $("#pid-cost-" + l).text(r.lines[0].feeScheduleAmount);
+                    $("#pid-content-" + l).text(r.lines[0].itemNumber);
+                    l++;
+                });
+                }
+        )
+    .catch(error=>console.log(error))
+
+</script>
 
 <footer class="py-5 bg-dark">
     <div class="container">
@@ -108,6 +189,5 @@
     <!-- /.container -->
 </footer>
 
+</body>
 </html>
-
-

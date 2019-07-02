@@ -1,17 +1,56 @@
 package com.example.serverdemo;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Random;
+import java.nio.file.Files;
+import java.util.*;
 
+import com.example.serverdemo.OldMethods.ProductBunch;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriUtils;
 
 @Controller
 public class PrimaryController {
+
+    @GetMapping("/listingTrizetto")
+    public String listingTrizetto(Model model) throws IOException {
+
+        File file = new ClassPathResource("json/productid.txt").getFile();
+        String append = new String(Files.readAllBytes(file.toPath()));
+        List<Item> list = stringToList(append);
+        model.addAttribute("products", list);
+        RequestWrapper rw = new RequestWrapper(list);
+        model.addAttribute("productids", rw);
+        return "listingTrizetto";
+    }
+
+    @GetMapping("/listingTrizetto2")
+    public String listingTrizetto2(Model model) throws IOException, NullPointerException {
+        RestTemplate restTemplate = new RestTemplate();
+        File file = new ClassPathResource("json/productid.txt").getFile();
+        String append = new String(Files.readAllBytes(file.toPath()));
+//        ApiResponse[] body = restTemplate.postForObject("http://localhost:8080/trizettoCall/",
+//                new RequestWrapper(stringToList(append)),
+//                ApiResponse[].class);
+        TrizettoEndpoint te = new TrizettoEndpoint();
+
+        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(append)));
+
+        model.addAttribute("body", body);
+        return "listingTrizetto2";
+    }
+
+    /* Old, unused methods. */
 
     @GetMapping("/listing")
     public String listing(@RequestParam(name="name", required=false, defaultValue="User") String userName,
@@ -62,10 +101,7 @@ public class PrimaryController {
 
         return "listing3";
     }
-    /**
-     * Get a random number of products between 2 and 10.
-     * URL is set to the Chuck Norris jokes API database.
-     */
+
     private ProductBunch getProducts(int num) {
         URL url;
         try {
@@ -77,6 +113,38 @@ public class PrimaryController {
 //        Random random = new Random();
 //        int numProducts = random.nextInt(9) + 2;
         return new ProductBunch(num, url);
+    }
+
+    private List<Item> stringToList(String raw) {
+        List<Item> list = new ArrayList<>();
+        String[] split = raw.split("\\r?\\n");
+
+        for (String s : split) {
+            String[] kvPair = s.split(",");
+            if (kvPair.length != 2) {
+                throw new RuntimeException("Incorrect parsing of values.");
+            }
+            list.add(new Item(kvPair[0], kvPair[1]));
+
+        }
+        return list;
+    }
+
+    private List<ApiRequest.ServiceLine> stringToLine(String raw) {
+
+        List<ApiRequest.ServiceLine> list = new ArrayList<>();
+
+        String[] split = raw.split("\\r?\\n");
+
+        for (String s: split) {
+            String[] kvPair = s.split(",");
+            if (kvPair.length != 2) {
+                throw new RuntimeException("Incorrect parsing of values.");
+            }
+            ApiRequest.ServiceLine service = new ApiRequest.ServiceLine(kvPair[1], kvPair[0]);
+            list.add(service);
+        }
+        return list;
     }
 
 }
