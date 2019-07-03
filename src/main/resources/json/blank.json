@@ -1,0 +1,29 @@
+[
+  {
+    "insuranceFilingType": "",
+    "planName": "UHC Military Tricare West Nevada Retired",
+    "zipCode": "35004",
+    "state": "",
+    "taxId": "341650951",
+    "patientBirthDate": "11/03/1961",
+    "medicalGroup": null,
+    "thirdPartyAdministratorName": null,
+    "hospitalName": null,
+    "renderingProviderNpi": "1609858729",
+    "lines": [
+      {
+        "eligibilityPayerId": 6,
+        "feeScheduleNumber": "F1008-9161",
+        "procedureCode": "A4353",
+        "vendorCode": "TT",
+        "itemNumber": "test",
+        "modifierCode": "",
+        "procedureGroup": "none",
+        "retailAmount": 20,
+        "cost": 1,
+        "units": 1,
+        "extendedUnits": 0
+      }
+    ]
+  }
+]

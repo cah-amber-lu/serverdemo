@@ -7,6 +7,8 @@ public class RequestWrapper  {
 
     private List<Item> items;
 
+    public RequestWrapper() {}
+
     public RequestWrapper (List<Item> items) {
         this.items = items;
     }

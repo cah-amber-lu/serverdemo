@@ -1,0 +1,79 @@
+[{
+  "insuranceFilingType": "",
+  "planName": "ANTHEM BLUECROSS BLUESHIELD OF OHIO",
+  "zipCode": "75701",
+  "state": "tx",
+  "taxId": "341650951",
+  "patientBirthDate": "11/03/1961",
+  "medicalGroup": "",
+  "thirdPartyAdministratorName": "",
+  "renderingProviderNpi":"1609858729",
+  "lines":
+  [
+    {
+      "eligibilityPayerId": 21,
+      "feeScheduleNumber": "F1009-3459",
+      "procedureCode": "E0603" ,
+      "vendorCode": "EW" ,
+      "itemNumber": "EW17070PMW",
+      "modifierCode": "",
+      "procedureGroup": "BREAST PUMPS AND SUPPLIES",
+      "retailAmount": 348.53,
+      "cost": 100,
+      "units": 1,
+      "extendedUnits": 1
+    },
+    {
+      "eligibilityPayerId": 21,
+      "feeScheduleNumber": "F1009-3459",
+      "procedureCode": "A4284" ,
+      "vendorCode": "EW" ,
+      "itemNumber": "EW17148PM",
+      "modifierCode": "",
+      "procedureGroup": "BREAST PUMPS AND SUPPLIES",
+      "retailAmount": 29.66,
+      "cost": 100,
+      "units": 1,
+      "extendedUnits": 1
+    },
+    {
+      "eligibilityPayerId": 21,
+      "feeScheduleNumber": "F1009-3459",
+      "procedureCode": "E1399" ,
+      "vendorCode": "EW" ,
+      "itemNumber": "EW617063",
+      "modifierCode": "",
+      "procedureGroup": "BREAST PUMPS AND SUPPLIES",
+      "retailAmount": 15.34,
+      "cost": 100,
+      "units": 1,
+      "extendedUnits": 1
+    },
+    {
+      "eligibilityPayerId": 21,
+      "feeScheduleNumber": "F1009-3459",
+      "procedureCode": "A4285" ,
+      "vendorCode": "JH" ,
+      "itemNumber": "JHMM011909",
+      "modifierCode": "",
+      "procedureGroup": "BREAST PUMPS AND SUPPLIES",
+      "retailAmount": 14.92,
+      "cost": 100,
+      "units": 1,
+      "extendedUnits": 1
+    },
+    {
+      "eligibilityPayerId": 21,
+      "feeScheduleNumber": "F1009-3459",
+      "procedureCode": "A4649" ,
+      "vendorCode": "ML" ,
+      "itemNumber": "ML67068",
+      "modifierCode": "",
+      "procedureGroup": "BREAST PUMPS AND SUPPLIES",
+      "retailAmount": 450.95,
+      "cost": 100,
+      "units": 1,
+      "extendedUnits": 1
+    }
+  ]
+}]
