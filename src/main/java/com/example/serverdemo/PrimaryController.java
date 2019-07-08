@@ -1,26 +1,31 @@
 package com.example.serverdemo;
 
+import com.example.serverdemo.OldMethods.ProductBunch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.util.*;
-
-import com.example.serverdemo.OldMethods.ProductBunch;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Service;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriUtils;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 @Controller
 public class PrimaryController {
+
+    private static final Logger LOG = LoggerFactory.getLogger(PrimaryController.class);
+
+    @Autowired
+    private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
     public String listingTrizetto(Model model) throws IOException {
@@ -36,18 +41,40 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
-        RestTemplate restTemplate = new RestTemplate();
         File file = new ClassPathResource("json/productid.txt").getFile();
         String append = new String(Files.readAllBytes(file.toPath()));
-//        ApiResponse[] body = restTemplate.postForObject("http://localhost:8080/trizettoCall/",
-//                new RequestWrapper(stringToList(append)),
-//                ApiResponse[].class);
-        TrizettoEndpoint te = new TrizettoEndpoint();
 
         List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(append)));
 
         model.addAttribute("body", body);
         return "listingTrizetto2";
+    }
+
+    @GetMapping("/listingTrizetto3")
+    public String listingTrizetto3(Model model) throws IOException, NullPointerException {
+        return "listingTrizetto3";
+    }
+
+
+    @GetMapping("/listingTrizetto4")
+    public String listingTrizetto4(Model model) throws IOException, NullPointerException {
+        File file = new ClassPathResource("json/productid.txt").getFile();
+        String append = new String(Files.readAllBytes(file.toPath()));
+
+        List<Item> list = stringToList(append);
+
+        List<ApiResponse> responses = new ArrayList<>();
+
+        for (Item i : list) {
+            LOG.info(i.getItemNumber() + " " + i.getProcedureCode());
+            responses.addAll(te.singleRequest(i.getItemNumber(), i.getProcedureCode()));
+
+        }
+
+        model.addAttribute("body", responses);
+
+        return "listingTrizetto4";
+
     }
 
     /* Old, unused methods. */

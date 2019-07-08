@@ -1,8 +1,12 @@
 package com.example.serverdemo;
 
+import jdk.nashorn.internal.objects.annotations.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -13,7 +17,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -30,13 +33,13 @@ public class TrizettoEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(TrizettoEndpoint.class);
 
     @Value("${serverdemo.trizetto.url}")
-    private String trizettoUrl;
+    public String trizettoUrl;
 
     @Value("${serverdemo.trizetto.username}")
-    private String trizettoUsername;
+    public String trizettoUsername;
 
     @Value("${serverdemo.trizetto.password}")
-    private String trizettoPassword;
+    public String trizettoPassword;
 
 
 
@@ -53,9 +56,10 @@ public class TrizettoEndpoint {
             throws IOException  {
 
         LOG.info("Calling function");
-//        LOG.debug("URL is " + trizettorUrl);
-//        LOG.debug("UN is " + trizettoUsername);
-//        LOG.debug("PW is " + trizettoPassword);
+        
+        LOG.debug("URL is " + trizettoUrl);
+        LOG.debug("UN is " + trizettoUsername);
+        LOG.debug("PW is " + trizettoPassword);
 
         RestTemplate restTemplate = new RestTemplate();
 
@@ -101,13 +105,13 @@ public class TrizettoEndpoint {
     }
 
 
-    @GetMapping("/singleRequestCall")
+    @PostMapping("/singleRequestCall")
     public List<ApiResponse> singleRequest (@RequestParam String itemNumber, @RequestParam String productCode)
             throws IOException {
         List<Item> temp = new ArrayList<>();
         temp.add(new Item(itemNumber, productCode));
         RequestWrapper rw = new RequestWrapper(temp);
-
+        LOG.info(rw.getList().get(0).getItemNumber() + " " + rw.getList().get(0).getProcedureCode());
         return listingTrizetto(rw);
     }
 

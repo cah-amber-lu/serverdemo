@@ -104,7 +104,6 @@ public class ApiRequest {
 
     /**
      * ServiceLine object class.
-     * //TODO: Optional feeScheduleNumber string and extendedUnits numeric in the Confluence docs.
      */
     public static class ServiceLine {
         Number eligibilityPayerId;      // NHXS unique identifier (returned from Insurance Verification).
