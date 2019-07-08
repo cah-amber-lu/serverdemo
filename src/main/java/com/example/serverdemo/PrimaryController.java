@@ -10,6 +10,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -24,15 +25,22 @@ public class PrimaryController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrimaryController.class);
 
+    private static final String PRODUCT_ID_PATH = "json/productid.txt";
+
+    private String productIds;
+
+    @PostConstruct
+    public void setup() throws IOException {
+        productIds = new String(Files.readAllBytes(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath()));
+    }
+
     @Autowired
     private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
     public String listingTrizetto(Model model) throws IOException {
 
-        File file = new ClassPathResource("json/productid.txt").getFile();
-        String append = new String(Files.readAllBytes(file.toPath()));
-        List<Item> list = stringToList(append);
+        List<Item> list = stringToList(productIds);
         model.addAttribute("products", list);
         RequestWrapper rw = new RequestWrapper(list);
         model.addAttribute("productids", rw);
@@ -41,10 +49,7 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
-        File file = new ClassPathResource("json/productid.txt").getFile();
-        String append = new String(Files.readAllBytes(file.toPath()));
-
-        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(append)));
+        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(productIds)));
 
         model.addAttribute("body", body);
         return "listingTrizetto2";
@@ -58,10 +63,7 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto4")
     public String listingTrizetto4(Model model) throws IOException, NullPointerException {
-        File file = new ClassPathResource("json/productid.txt").getFile();
-        String append = new String(Files.readAllBytes(file.toPath()));
-
-        List<Item> list = stringToList(append);
+        List<Item> list = stringToList(productIds);
 
         List<ApiResponse> responses = new ArrayList<>();
 
