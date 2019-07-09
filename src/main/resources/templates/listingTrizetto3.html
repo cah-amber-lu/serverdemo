@@ -53,6 +53,7 @@
             <div class="list-group">
                 <a href="/listingTrizetto" class="list-group-item">Listing 1</a>
                 <a href="/listingTrizetto2" class="list-group-item">Listing 2</a>
+                <a href="/listingTrizetto3" class="list-group-item">Listing 3</a>
                 <a href="/listingTrizetto4" class="list-group-item">Listing 4</a>
             </div>
 
@@ -150,7 +151,7 @@
 
         return new Promise((resolve, reject) => {
             $.ajax({
-                url: "http://localhost:8080/trizettoCall",
+                url: "http://localhost:8080/singleRequestCall",
                 data: JSON.stringify(products),
                 type: "POST",
                 cache: false,
