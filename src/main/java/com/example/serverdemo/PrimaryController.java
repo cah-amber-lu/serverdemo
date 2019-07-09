@@ -34,8 +34,6 @@ public class PrimaryController {
         String append = new String(Files.readAllBytes(file.toPath()));
         List<Item> list = stringToList(append);
         model.addAttribute("products", list);
-        RequestWrapper rw = new RequestWrapper(list);
-        model.addAttribute("productids", rw);
         return "listingTrizetto";
     }
 
@@ -52,6 +50,10 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto3")
     public String listingTrizetto3(Model model) throws IOException, NullPointerException {
+        File file = new ClassPathResource("json/productid.txt").getFile();
+        String append = new String(Files.readAllBytes(file.toPath()));
+        List<Item> list = stringToList(append);
+        model.addAttribute("products", list);
         return "listingTrizetto3";
     }
 
@@ -63,13 +65,13 @@ public class PrimaryController {
 
         List<Item> list = stringToList(append);
 
-        List<ApiResponse> responses = new ArrayList<>();
+        List<ApiResponse> responses = te.listingTrizetto(new RequestWrapper(list));
 
-        for (Item i : list) {
-            LOG.info(i.getItemNumber() + " " + i.getProcedureCode());
-            responses.addAll(te.singleRequest(i.getItemNumber(), i.getProcedureCode()));
-
-        }
+//        for (Item i : list) {
+//            LOG.info(i.getItemNumber() + " " + i.getProcedureCode());
+//            responses.addAll(te.singleRequest(i.getItemNumber(), i.getProcedureCode()));
+//
+//        }
 
         model.addAttribute("body", responses);
 

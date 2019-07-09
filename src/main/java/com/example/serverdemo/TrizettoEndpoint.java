@@ -41,6 +41,7 @@ public class TrizettoEndpoint {
     @Value("${serverdemo.trizetto.password}")
     public String trizettoPassword;
 
+    private RestTemplate restTemplate = new RestTemplate();
 
 
     /**
@@ -55,15 +56,13 @@ public class TrizettoEndpoint {
     public List<ApiResponse> listingTrizetto (@RequestBody RequestWrapper wrapper)
             throws IOException  {
 
+        HttpHeaders headers = setHeaders();
+
         LOG.info("Calling function");
-        
+
         LOG.debug("URL is " + trizettoUrl);
         LOG.debug("UN is " + trizettoUsername);
         LOG.debug("PW is " + trizettoPassword);
-
-        RestTemplate restTemplate = new RestTemplate();
-
-        HttpHeaders headers = new HttpHeaders();
 
         String filePath = "json/blank.json";
 
@@ -80,18 +79,6 @@ public class TrizettoEndpoint {
 
         request.get(0).setLines(services);
 
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        headers.setBasicAuth(trizettoUsername, trizettoPassword);
-
-        headers.setConnection("keep-alive");
-
-        headers.setCacheControl("no-cache");
-
-        headers.set("accept-encoding", "gzip, deflate");
-
         HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
 
         ApiResponse[] ar = restTemplate
@@ -105,14 +92,61 @@ public class TrizettoEndpoint {
     }
 
 
+//    @PostMapping("/singleRequestCall")
+//    public List<ApiResponse> singleRequest (@RequestParam String itemNumber, @RequestParam String productCode)
+//            throws IOException {
+//        List<Item> temp = new ArrayList<>();
+//        temp.add(new Item(itemNumber, productCode));
+//        RequestWrapper rw = new RequestWrapper(temp);
+//        LOG.info(rw.getList().get(0).getItemNumber() + " " + rw.getList().get(0).getProcedureCode());
+//        return listingTrizetto(rw);
+//    }
+
     @PostMapping("/singleRequestCall")
-    public List<ApiResponse> singleRequest (@RequestParam String itemNumber, @RequestParam String productCode)
+    public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
             throws IOException {
-        List<Item> temp = new ArrayList<>();
-        temp.add(new Item(itemNumber, productCode));
-        RequestWrapper rw = new RequestWrapper(temp);
-        LOG.info(rw.getList().get(0).getItemNumber() + " " + rw.getList().get(0).getProcedureCode());
-        return listingTrizetto(rw);
+
+        HttpHeaders headers = setHeaders();
+
+        String filePath = "json/blank.json";
+
+        File resource = new ClassPathResource(filePath).getFile();
+
+        List<ApiRequest> request = new ApiRequest().parse(resource);
+
+        List<ApiResponse> responses = new ArrayList<>();
+
+        for (Item item : wrapper.getList()) {
+            List<ApiRequest.ServiceLine> line = new ArrayList<>();
+            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
+            request.get(0).setLines(line);
+            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
+            ApiResponse[] ar = restTemplate
+                    .exchange(trizettoUrl, HttpMethod.POST, entity, ApiResponse[].class)
+                    .getBody();
+
+            responses.add(ar[0]);
+        }
+        return responses;
+    }
+
+    private HttpHeaders setHeaders() {
+
+        HttpHeaders headers = new HttpHeaders();
+
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        headers.setBasicAuth(trizettoUsername, trizettoPassword);
+
+        headers.setConnection("keep-alive");
+
+        headers.setCacheControl("no-cache");
+
+        headers.set("accept-encoding", "gzip, deflate");
+
+        return headers;
     }
 
 }

@@ -53,6 +53,7 @@
             <div class="list-group">
                 <a href="/listingTrizetto" class="list-group-item">Listing 1</a>
                 <a href="/listingTrizetto2" class="list-group-item">Listing 2</a>
+                <a href="/listingTrizetto4" class="list-group-item">Listing 4</a>
             </div>
 
         </div>
@@ -88,15 +89,17 @@
             </div>
 
             <div class="row">
-                <div class="col-lg-4 col-md-6 mb-4" th:each="product : ${#numbers.sequence(0, 12)}">
+                <div class="col-lg-4 col-md-6 mb-4" th:each="product : ${products}">
+                    <input type="hidden" th:class="productdata" th:productvalue="${product.itemNumber}" th:productcode="${product.procedureCode}">
+                    <!--                    <input type="hidden" th:onload="makeSingleRequest(${product.itemNumber}, ${product.procedureCode})">-->
                     <div class="card h-100">
                         <a href="#"><img class="card-img-top" src="http://placehold.it/700x400" alt=""></a>
                         <div class="card-body">
                             <h4 class="card-title">
-                                <a href="#" th:id="'pid-title-' + ${product}" th:text="'ID' + ${product}"></a>
+                                <a href="#" th:id="'pid-title-' + ${product.itemNumber}" th:text="'ID' + ${product.procedureCode}"></a>
                             </h4>
-                            <h5 th:id="'pid-cost-' + ${product}">Currently Loading...</h5>
-                            <p class="card-text" th:id="'pid-content-' + ${product}"></p>
+                            <h5 th:id="'pid-cost-' + ${product.itemNumber}">Currently Loading...</h5>
+                            <p class="card-text" th:id="'pid-content-' + ${product.itemNumber}"></p>
                         </div>
                         <div class="card-footer">
                             <small class="text-muted">&#9733; &#9733; &#9733; &#9733; &#9734;</small>
@@ -115,15 +118,48 @@
 <!-- /.container -->
 
 <script th:inline="javascript">
+
+    // function makeSingleRequest(code, number) {
+    //     return new Promise((resolve, reject) => {
+    //         $.ajax({
+    //             url: "http://localhost:8080/singleRequestCall?id=" + code + "&num=" + number,
+    //             type: "POST",
+    //             cache: false,
+    //             dataType: "json",
+    //             crossDomain: true,
+    //             success: function(result) {
+    //                 resolve(result)
+    //             },
+    //             error: function(result) {
+    //                 reject(result)
+    //             }
+    //         })
+    //     })
+    // }
+
     function makeRequest() {
+
+        let products = { list : [] };
+        $('input.productdata').each(function() {
+            products.list.push({ itemNumber: $(this).attr('productvalue'), procedureCode: $(this).attr('productcode') });
+            console.log($(this).attr('productvalue'));
+        });
+        console.log(products);
+
+        console.log(JSON.stringify(products));
+
         return new Promise((resolve, reject) => {
             $.ajax({
                 url: "http://localhost:8080/trizettoCall",
-                type: "GET",
+                data: JSON.stringify(products),
+                type: "POST",
                 cache: false,
                 datatype: "json",
+                contentType: "application/json; charset=utf-8",
                 crossDomain:true,
                 success: function(result) {
+                    console.log('got trizetto response!  YAY!');
+                    console.log(result);
                     resolve(result)
                 },
                 error: function(result) {
@@ -138,14 +174,16 @@
             function(result) {
                 let l = 0;
                 result.forEach(function(r) {
-                    $("#pid-title-" + l).text(r.lines[0].procedureGroup);
-                    $("#pid-cost-" + l).text(r.lines[0].feeScheduleAmount);
-                    $("#pid-content-" + l).text(r.lines[0].itemNumber);
+                    console.log(r);
+                    $("#pid-title-" + r.lines[0].itemNumber).text(r.lines[0].procedureCode);
+                    $("#pid-cost-" + r.lines[0].itemNumber).text(r.lines[0].cost);
+                    $("#pid-content-" + r.lines[0].itemNumber).text(r.lines[0].itemNumber);
                     l++;
                 });
             }
         )
         .catch(error=>console.log(error))
+
 </script>
 
 <footer class="py-5 bg-dark">
