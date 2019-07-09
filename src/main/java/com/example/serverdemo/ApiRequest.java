@@ -10,6 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public class ApiRequest {
+    private static final Gson GSON = new Gson();
 
         private String insuranceFilingType;         // Insurance filing type (MB, PPO, etc.).
         private String planName;                    // Customer plan name description.
@@ -211,10 +212,8 @@ public class ApiRequest {
         }
     }
 
-    List<ApiRequest> parse (File f) throws IOException {
-        String request = new String(Files.readAllBytes(f.toPath()));
-        Gson gson = new Gson();
-        return Arrays.asList(gson.fromJson(request, ApiRequest[].class));
+    List<ApiRequest> parse (String request) throws IOException {
+        return Arrays.asList(GSON.fromJson(request, ApiRequest[].class));
     }
 
 }

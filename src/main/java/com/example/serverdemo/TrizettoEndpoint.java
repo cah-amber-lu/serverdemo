@@ -3,6 +3,8 @@ package com.example.serverdemo;
 import jdk.nashorn.internal.objects.annotations.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -15,8 +17,10 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -32,6 +36,8 @@ public class TrizettoEndpoint {
 
     private static final Logger LOG = LoggerFactory.getLogger(TrizettoEndpoint.class);
 
+    private static final String FILE_PATH = "json/blank.json";
+
     @Value("${serverdemo.trizetto.url}")
     public String trizettoUrl;
 
@@ -41,8 +47,27 @@ public class TrizettoEndpoint {
     @Value("${serverdemo.trizetto.password}")
     public String trizettoPassword;
 
-    private RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    private RestTemplate restTemplate;
 
+    private HttpHeaders headers;
+
+    private String jsonTemplate;
+
+    @PostConstruct
+    public void setup() throws IOException
+    {
+        // load json template at startup and keep in ram
+        jsonTemplate = new String(Files.readAllBytes(new ClassPathResource(FILE_PATH).getFile().toPath()));
+
+        headers = new HttpHeaders();
+        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBasicAuth(trizettoUsername, trizettoPassword);
+        headers.setConnection("keep-alive");
+        headers.setCacheControl("no-cache");
+        headers.set("accept-encoding", "gzip, deflate");
+    }
 
     /**
      *
@@ -56,19 +81,13 @@ public class TrizettoEndpoint {
     public List<ApiResponse> listingTrizetto (@RequestBody RequestWrapper wrapper)
             throws IOException  {
 
-        HttpHeaders headers = setHeaders();
-
         LOG.info("Calling function");
-
+        
         LOG.debug("URL is " + trizettoUrl);
         LOG.debug("UN is " + trizettoUsername);
         LOG.debug("PW is " + trizettoPassword);
 
-        String filePath = "json/blank.json";
-
-        File resource = new ClassPathResource(filePath).getFile();
-
-        List<ApiRequest> request = new ApiRequest().parse(resource);
+        List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
         List<ApiRequest.ServiceLine> services = new ArrayList<>();
 
@@ -81,11 +100,8 @@ public class TrizettoEndpoint {
 
         HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
 
-        ApiResponse[] ar = restTemplate
-                .exchange(trizettoUrl, HttpMethod.POST, entity, ApiResponse[].class)
-                .getBody();
+        ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
 
-//        LOG.info("request done: {}", ar);
         LOG.info("number of responses: {}", ar.length);
 
         return ar != null ? Arrays.asList(ar) : Collections.emptyList();
@@ -106,13 +122,7 @@ public class TrizettoEndpoint {
     public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
             throws IOException {
 
-        HttpHeaders headers = setHeaders();
-
-        String filePath = "json/blank.json";
-
-        File resource = new ClassPathResource(filePath).getFile();
-
-        List<ApiRequest> request = new ApiRequest().parse(resource);
+        List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
         List<ApiResponse> responses = new ArrayList<>();
 
@@ -121,32 +131,10 @@ public class TrizettoEndpoint {
             line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
             request.get(0).setLines(line);
             HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
-            ApiResponse[] ar = restTemplate
-                    .exchange(trizettoUrl, HttpMethod.POST, entity, ApiResponse[].class)
-                    .getBody();
-
+            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
             responses.add(ar[0]);
         }
         return responses;
-    }
-
-    private HttpHeaders setHeaders() {
-
-        HttpHeaders headers = new HttpHeaders();
-
-        headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
-
-        headers.setContentType(MediaType.APPLICATION_JSON);
-
-        headers.setBasicAuth(trizettoUsername, trizettoPassword);
-
-        headers.setConnection("keep-alive");
-
-        headers.setCacheControl("no-cache");
-
-        headers.set("accept-encoding", "gzip, deflate");
-
-        return headers;
     }
 
 }
