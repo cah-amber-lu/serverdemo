@@ -1,30 +1,30 @@
 package com.example.serverdemo;
 
-import jdk.nashorn.internal.objects.annotations.Property;
+import jdk.internal.org.jline.utils.Log;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.IntStream;
 
 
 /**
@@ -54,12 +54,16 @@ public class TrizettoEndpoint {
 
     private String jsonTemplate;
 
+    /** Variables for timekeeping. */
+
+    ElapsedTime elapsedTime;
+
+
     @PostConstruct
     public void setup() throws IOException
     {
         // load json template at startup and keep in ram
         jsonTemplate = new String(Files.readAllBytes(new ClassPathResource(FILE_PATH).getFile().toPath()));
-
         headers = new HttpHeaders();
         headers.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON));
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -67,6 +71,7 @@ public class TrizettoEndpoint {
         headers.setConnection("keep-alive");
         headers.setCacheControl("no-cache");
         headers.set("accept-encoding", "gzip, deflate");
+        elapsedTime = new ElapsedTime();
     }
 
     /**
@@ -81,11 +86,13 @@ public class TrizettoEndpoint {
     public List<ApiResponse> listingTrizetto (@RequestBody RequestWrapper wrapper)
             throws IOException  {
 
-        LOG.info("Calling function");
-        
-        LOG.debug("URL is " + trizettoUrl);
-        LOG.debug("UN is " + trizettoUsername);
-        LOG.debug("PW is " + trizettoPassword);
+        elapsedTime.setStartTime(System.currentTimeMillis());
+//
+//        LOG.info("Calling function");
+//
+//        LOG.debug("URL is " + trizettoUrl);
+//        LOG.debug("UN is " + trizettoUsername);
+//        LOG.debug("PW is " + trizettoPassword);
 
         List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
@@ -102,7 +109,14 @@ public class TrizettoEndpoint {
 
         ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
 
-        LOG.info("number of responses: {}", ar.length);
+        elapsedTime.setEndTime(System.currentTimeMillis());
+
+        elapsedTime.setTotalTime(elapsedTime.getEndTime() - elapsedTime.getStartTime());
+
+        LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
+                elapsedTime.getEndTime(), elapsedTime.getTotalTime());
+
+        // LOG.info("number of responses: {}", ar.length);
 
         return ar != null ? Arrays.asList(ar) : Collections.emptyList();
     }
@@ -122,18 +136,41 @@ public class TrizettoEndpoint {
     public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
             throws IOException {
 
+        elapsedTime.setStartTime(System.currentTimeMillis());
+
         List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
         List<ApiResponse> responses = new ArrayList<>();
 
-        for (Item item : wrapper.getList()) {
+//        for (Item item : wrapper.getList()) {
+//            List<ApiRequest.ServiceLine> line = new ArrayList<>();
+//            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
+//            request.get(0).setLines(line);
+//            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
+//            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
+//            responses.add(ar[0]);
+//            elapsedTime.addIncrement(System.currentTimeMillis());
+//            LOG.info("Elapsed time {} ms", elapsedTime.getLastIncrement());
+//        }
+
+        IntStream.range(0, wrapper.getList().size()).parallel().forEach(i -> {
+            Item item = wrapper.getList().get(i);
             List<ApiRequest.ServiceLine> line = new ArrayList<>();
             line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
             request.get(0).setLines(line);
             HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
             ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
             responses.add(ar[0]);
-        }
+            elapsedTime.addIncrement(System.currentTimeMillis());
+            LOG.info("Elapsed time {} ms", elapsedTime.getLastIncrement());
+        });
+
+        elapsedTime.setEndTime(System.currentTimeMillis());
+        elapsedTime.setTotalTime(elapsedTime.getEndTime() - elapsedTime.getStartTime());
+
+        LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
+                elapsedTime.getEndTime(), elapsedTime.getTotalTime());
+
         return responses;
     }
 

@@ -31,24 +31,31 @@ public class PrimaryController {
 
     @PostConstruct
     public void setup() throws IOException {
-        productIds = new String(Files.readAllBytes(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath()));
+        if (new ClassPathResource(PRODUCT_ID_PATH).exists()) {
+            productIds = new String(Files.readAllBytes(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath()));
+        }
+        else {
+            throw new RuntimeException("Cannot find " + PRODUCT_ID_PATH + " to read");
+        }
     }
 
     @Autowired
     private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
-    public String listingTrizetto(Model model) throws IOException {
-
+    public String listingTrizetto(Model model) {
+        final long startTime = System.currentTimeMillis();
         List<Item> list = stringToList(productIds);
+        final long endTime = System.currentTimeMillis();
+        final long totalTime = endTime - startTime;
         model.addAttribute("products", list);
+        model.addAttribute("time", totalTime);
         return "listingTrizetto";
     }
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
         List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(productIds)));
-
         model.addAttribute("body", body);
         return "listingTrizetto2";
     }
@@ -62,21 +69,11 @@ public class PrimaryController {
         return "listingTrizetto3";
     }
 
-
     @GetMapping("/listingTrizetto4")
     public String listingTrizetto4(Model model) throws IOException, NullPointerException {
         List<Item> list = stringToList(productIds);
-
-        List<ApiResponse> responses = te.listingTrizetto(new RequestWrapper(list));
-
-//        for (Item i : list) {
-//            LOG.info(i.getItemNumber() + " " + i.getProcedureCode());
-//            responses.addAll(te.singleRequest(i.getItemNumber(), i.getProcedureCode()));
-//
-//        }
-
+        List<ApiResponse> responses = te.singleRequest(new RequestWrapper(list));
         model.addAttribute("body", responses);
-
         return "listingTrizetto4";
 
     }
