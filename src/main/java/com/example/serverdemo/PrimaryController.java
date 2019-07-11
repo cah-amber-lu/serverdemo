@@ -52,19 +52,15 @@ public class PrimaryController {
     @GetMapping("/listingTrizetto")
     public String listingTrizetto(Model model) throws IOException {
         writeToFile("Page 1");
-        final long startTime = System.currentTimeMillis();
         List<Item> list = stringsToItems(productIds);
-        final long endTime = System.currentTimeMillis();
-        final long totalTime = endTime - startTime;
         model.addAttribute("products", list);
-        model.addAttribute("time", totalTime);
         return "listingTrizetto";
     }
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
-        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringsToItems(productIds)));
         writeToFile("Page 2");
+        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringsToItems(productIds)));
         model.addAttribute("body", body);
         return "listingTrizetto2";
     }
@@ -96,6 +92,19 @@ public class PrimaryController {
         } finally {
             writer.close();
         }
+    }
+
+    private List<Item> stringsToItems(List<String> pids) {
+        List<Item> list = new ArrayList<>();
+        for (String pid : pids) {
+            String[] kvPair = pid.split(",");
+            if (kvPair.length != 2) {
+                throw new RuntimeException("Incorrect parsing of values.");
+            }
+            list.add(new Item(kvPair[0], kvPair[1]));
+        }
+
+        return list;
     }
 
     /* Old, unused methods. */
@@ -160,19 +169,6 @@ public class PrimaryController {
         }
 
         return new ProductBunch(num, url);
-    }
-
-    private List<Item> stringsToItems(List<String> pids) {
-        List<Item> list = new ArrayList<>();
-        for (String pid : pids) {
-            String[] kvPair = pid.split(",");
-            if (kvPair.length != 2) {
-                throw new RuntimeException("Incorrect parsing of values.");
-            }
-            list.add(new Item(kvPair[0], kvPair[1]));
-        }
-
-        return list;
     }
 
 }
