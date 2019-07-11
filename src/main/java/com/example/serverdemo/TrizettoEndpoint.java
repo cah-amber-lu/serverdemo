@@ -110,8 +110,6 @@ public class TrizettoEndpoint {
         LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
                 elapsedTime.getEndTime(), elapsedTime.getTotalTime());
 
-        // LOG.info("number of responses: {}", ar.length);
-
         return ar != null ? Arrays.asList(ar) : Collections.emptyList();
     }
 
