@@ -15,8 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriUtils;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
@@ -27,28 +26,12 @@ import java.util.*;
 public class JsonTests {
 
     @Test
-    public void singleCall() throws IOException, NullPointerException {
-        File file = new ClassPathResource("json/productid.txt").getFile();
-        String append = new String(Files.readAllBytes(file.toPath()));
-        // Map<String, String> map = new HashMap<>();
-
-        List<String[]> list = new ArrayList<>();
-        String[] split = append.split("\\r?\\n");
-
-        for (String s : split) {
-            String[] kvPair = s.split(",");
-            if (kvPair.length != 2) {
-                throw new RuntimeException("Incorrect parsing of values.");
-            }
-            list.add(kvPair);
-        }
-
-        TrizettoEndpoint te = new TrizettoEndpoint();
-
-        List<ApiResponse> list2 = te.singleRequest("OJCMMM", "E1399");
-
-        System.out.println(list2.size());
-
+    public void fileWriter() throws IOException {
+        FileWriter fileWriter = new FileWriter("newfile.txt");
+        PrintWriter printWriter = new PrintWriter(fileWriter);
+        printWriter.print("Some String");
+        printWriter.printf("Product name is %s and its price is %d $", "iPhone", 1000);
+        printWriter.close();
     }
 
     @Test

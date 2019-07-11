@@ -24,7 +24,7 @@ public class ProxyTest {
     public void TestMultipleRequest() throws IOException {
         File resource = new ClassPathResource("json/multiple.json").getFile();
         Assert.assertTrue(resource.canRead());
-        System.out.println(new ApiRequest().parse(resource).size());
+        // System.out.println(new ApiRequest().parse(resource).size());
 //        List<ApiResponse> ar = new TrizettoEndpoint().listingTrizetto("json/multiple.json");
 //        for (ApiResponse a : ar) {
 //            System.out.println(a.getTaxId());

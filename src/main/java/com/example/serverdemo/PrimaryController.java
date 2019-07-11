@@ -11,19 +11,26 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 
 @Controller
 public class PrimaryController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrimaryController.class);
+
+    private static final String LOG_FILE_PATH = "RequestLog.txt";
 
     private static final String PRODUCT_ID_PATH = "json/productid.txt";
 
@@ -43,7 +50,8 @@ public class PrimaryController {
     private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
-    public String listingTrizetto(Model model) {
+    public String listingTrizetto(Model model) throws IOException {
+        writeToFile("Page 1");
         final long startTime = System.currentTimeMillis();
         List<Item> list = stringToList(productIds);
         final long endTime = System.currentTimeMillis();
@@ -55,6 +63,7 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
+        writeToFile("Page 2");
         List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(productIds)));
         model.addAttribute("body", body);
         return "listingTrizetto2";
@@ -62,6 +71,7 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto3")
     public String listingTrizetto3(Model model) throws IOException, NullPointerException {
+        writeToFile("Page 3");
         File file = new ClassPathResource("json/productid.txt").getFile();
         String append = new String(Files.readAllBytes(file.toPath()));
         List<Item> list = stringToList(append);
@@ -70,12 +80,40 @@ public class PrimaryController {
     }
 
     @GetMapping("/listingTrizetto4")
-    public String listingTrizetto4(Model model) throws IOException, NullPointerException {
+    public String listingTrizetto4(Model model)
+            throws IOException, NullPointerException, InterruptedException, ExecutionException {
+        writeToFile("Page 4");
         List<Item> list = stringToList(productIds);
         List<ApiResponse> responses = te.singleRequest(new RequestWrapper(list));
         model.addAttribute("body", responses);
         return "listingTrizetto4";
 
+    }
+
+    private void writeToFile(String name) throws IOException {
+        BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE_PATH, true));
+        try {
+            writer.append("--\r\n");
+            writer.append(name).append(" made a call to the proxy at ")
+                    .append(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()));
+        } finally {
+            writer.close();
+        }
+    }
+
+    private List<Item> stringToList(String raw) {
+        List<Item> list = new ArrayList<>();
+        String[] split = raw.split("\\r?\\n");
+
+        for (String s : split) {
+            String[] kvPair = s.split(",");
+            if (kvPair.length != 2) {
+                throw new RuntimeException("Incorrect parsing of values.");
+            }
+            list.add(new Item(kvPair[0], kvPair[1]));
+
+        }
+        return list;
     }
 
     /* Old, unused methods. */
@@ -141,21 +179,6 @@ public class PrimaryController {
 //        Random random = new Random();
 //        int numProducts = random.nextInt(9) + 2;
         return new ProductBunch(num, url);
-    }
-
-    private List<Item> stringToList(String raw) {
-        List<Item> list = new ArrayList<>();
-        String[] split = raw.split("\\r?\\n");
-
-        for (String s : split) {
-            String[] kvPair = s.split(",");
-            if (kvPair.length != 2) {
-                throw new RuntimeException("Incorrect parsing of values.");
-            }
-            list.add(new Item(kvPair[0], kvPair[1]));
-
-        }
-        return list;
     }
 
     private List<ApiRequest.ServiceLine> stringToLine(String raw) {

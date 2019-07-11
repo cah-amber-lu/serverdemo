@@ -1,6 +1,6 @@
 package com.example.serverdemo;
 
-import jdk.internal.org.jline.utils.Log;
+import io.netty.util.concurrent.CompleteFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +15,12 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
+import java.io.*;
+import java.nio.Buffer;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.stream.IntStream;
 
 
@@ -37,6 +34,8 @@ public class TrizettoEndpoint {
     private static final Logger LOG = LoggerFactory.getLogger(TrizettoEndpoint.class);
 
     private static final String FILE_PATH = "json/blank.json";
+
+    private static final String LOG_FILE_PATH = "RequestLog.txt";
 
     @Value("${serverdemo.trizetto.url}")
     public String trizettoUrl;
@@ -54,10 +53,11 @@ public class TrizettoEndpoint {
 
     private String jsonTemplate;
 
+    private ExecutorService executorService;
+
     /** Variables for timekeeping. */
 
-    ElapsedTime elapsedTime;
-
+    private ElapsedTime elapsedTime;
 
     @PostConstruct
     public void setup() throws IOException
@@ -72,6 +72,7 @@ public class TrizettoEndpoint {
         headers.setCacheControl("no-cache");
         headers.set("accept-encoding", "gzip, deflate");
         elapsedTime = new ElapsedTime();
+        executorService = Executors.newFixedThreadPool(3);
     }
 
     /**
@@ -113,8 +114,10 @@ public class TrizettoEndpoint {
 
         elapsedTime.setTotalTime(elapsedTime.getEndTime() - elapsedTime.getStartTime());
 
-        LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
-                elapsedTime.getEndTime(), elapsedTime.getTotalTime());
+        writeTimeToFile();
+
+//        LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
+//                elapsedTime.getEndTime(), elapsedTime.getTotalTime());
 
         // LOG.info("number of responses: {}", ar.length);
 
@@ -134,44 +137,75 @@ public class TrizettoEndpoint {
 
     @PostMapping("/singleRequestCall")
     public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
-            throws IOException {
+            throws IOException, ExecutionException, InterruptedException {
 
         elapsedTime.setStartTime(System.currentTimeMillis());
 
-        List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
-
         List<ApiResponse> responses = new ArrayList<>();
 
-//        for (Item item : wrapper.getList()) {
+        List<Future<ApiResponse[]>> futures = new ArrayList<>();
+
+        for (Item item : wrapper.getList()) {
+            futures.add(callAPI(item));
+        }
+
+        for (Future<ApiResponse[]> f : futures) {
+            f.get();
+        }
+
+        for (Future<ApiResponse[]> f : futures) {
+            if (f.isDone()) {
+                responses.add(f.get()[0]);
+            }
+        }
+
+//        IntStream.range(0, wrapper.getList().size()).parallel().forEach(i -> {
+//            Item item = wrapper.getList().get(i);
 //            List<ApiRequest.ServiceLine> line = new ArrayList<>();
 //            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
 //            request.get(0).setLines(line);
 //            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
 //            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
-//            responses.add(ar[0]);
 //            elapsedTime.addIncrement(System.currentTimeMillis());
 //            LOG.info("Elapsed time {} ms", elapsedTime.getLastIncrement());
-//        }
 
-        IntStream.range(0, wrapper.getList().size()).parallel().forEach(i -> {
-            Item item = wrapper.getList().get(i);
-            List<ApiRequest.ServiceLine> line = new ArrayList<>();
-            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
-            request.get(0).setLines(line);
-            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
-            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
-            responses.add(ar[0]);
-            elapsedTime.addIncrement(System.currentTimeMillis());
-            LOG.info("Elapsed time {} ms", elapsedTime.getLastIncrement());
-        });
 
         elapsedTime.setEndTime(System.currentTimeMillis());
         elapsedTime.setTotalTime(elapsedTime.getEndTime() - elapsedTime.getStartTime());
 
+        writeTimeToFile();
         LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
                 elapsedTime.getEndTime(), elapsedTime.getTotalTime());
 
         return responses;
     }
 
+    private Future<ApiResponse[]> callAPI (Item item) throws IOException {
+        List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
+        return executorService.submit(() -> {
+            List<ApiRequest.ServiceLine> line = new ArrayList<>();
+            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
+            request.get(0).setLines(line);
+            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
+            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
+            if (ar == null) {
+                //TODO: Set up a default constructor in APIResponse so we can just return a default object instead of exception
+              throw new RuntimeException("Did not receive a response from the API");
+            }
+            return ar;
+        });
+    }
+
+    private void writeTimeToFile() {
+        if (new File(LOG_FILE_PATH).canWrite()) {
+            LOG.info("Can write to file");
+        }
+        try (FileWriter fw = new FileWriter(LOG_FILE_PATH, true);
+             BufferedWriter writer = new BufferedWriter(fw)){
+            String time = elapsedTime.getTotalTime() + " ms";
+            writer.append("\r\nTotal time taken: ").append(time).append("\r\n");
+        } catch (IOException e){
+            throw new RuntimeException(e);
+        }
+    }
 }
