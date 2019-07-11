@@ -1,24 +1,19 @@
 package com.example.serverdemo;
 
-import jdk.nashorn.internal.objects.annotations.Property;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -82,10 +77,8 @@ public class TrizettoEndpoint {
             throws IOException  {
 
         LOG.info("Calling function");
-        
-        LOG.debug("URL is " + trizettoUrl);
-        LOG.debug("UN is " + trizettoUsername);
-        LOG.debug("PW is " + trizettoPassword);
+
+        LOG.debug("URL={}, UN={}, PW={}", trizettoUrl, trizettoUsername, trizettoPassword);
 
         List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
@@ -107,17 +100,6 @@ public class TrizettoEndpoint {
         return ar != null ? Arrays.asList(ar) : Collections.emptyList();
     }
 
-
-//    @PostMapping("/singleRequestCall")
-//    public List<ApiResponse> singleRequest (@RequestParam String itemNumber, @RequestParam String productCode)
-//            throws IOException {
-//        List<Item> temp = new ArrayList<>();
-//        temp.add(new Item(itemNumber, productCode));
-//        RequestWrapper rw = new RequestWrapper(temp);
-//        LOG.info(rw.getList().get(0).getItemNumber() + " " + rw.getList().get(0).getProcedureCode());
-//        return listingTrizetto(rw);
-//    }
-
     @PostMapping("/singleRequestCall")
     public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
             throws IOException {
@@ -127,9 +109,7 @@ public class TrizettoEndpoint {
         List<ApiResponse> responses = new ArrayList<>();
 
         for (Item item : wrapper.getList()) {
-            List<ApiRequest.ServiceLine> line = new ArrayList<>();
-            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
-            request.get(0).setLines(line);
+            request.get(0).setLines(Arrays.asList(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber())));
             HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
             ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
             responses.add(ar[0]);
