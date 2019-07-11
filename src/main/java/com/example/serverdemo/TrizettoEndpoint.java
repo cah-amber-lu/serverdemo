@@ -1,6 +1,5 @@
 package com.example.serverdemo;
 
-import io.netty.util.concurrent.CompleteFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +17,10 @@ import javax.annotation.PostConstruct;
 import java.io.*;
 import java.nio.Buffer;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -87,13 +90,11 @@ public class TrizettoEndpoint {
     public List<ApiResponse> listingTrizetto (@RequestBody RequestWrapper wrapper)
             throws IOException  {
 
+        LOG.info("Calling function");
+
+        LOG.debug("URL={}, UN={}, PW={}", trizettoUrl, trizettoUsername, trizettoPassword);
+
         elapsedTime.setStartTime(System.currentTimeMillis());
-//
-//        LOG.info("Calling function");
-//
-//        LOG.debug("URL is " + trizettoUrl);
-//        LOG.debug("UN is " + trizettoUsername);
-//        LOG.debug("PW is " + trizettoPassword);
 
         List<ApiRequest> request = new ApiRequest().parse(jsonTemplate);
 
@@ -119,21 +120,8 @@ public class TrizettoEndpoint {
 //        LOG.info("Total time: From {} to {} for {}", elapsedTime.getStartTime(),
 //                elapsedTime.getEndTime(), elapsedTime.getTotalTime());
 
-        // LOG.info("number of responses: {}", ar.length);
-
         return ar != null ? Arrays.asList(ar) : Collections.emptyList();
     }
-
-
-//    @PostMapping("/singleRequestCall")
-//    public List<ApiResponse> singleRequest (@RequestParam String itemNumber, @RequestParam String productCode)
-//            throws IOException {
-//        List<Item> temp = new ArrayList<>();
-//        temp.add(new Item(itemNumber, productCode));
-//        RequestWrapper rw = new RequestWrapper(temp);
-//        LOG.info(rw.getList().get(0).getItemNumber() + " " + rw.getList().get(0).getProcedureCode());
-//        return listingTrizetto(rw);
-//    }
 
     @PostMapping("/singleRequestCall")
     public List<ApiResponse> singleRequest (@RequestBody RequestWrapper wrapper)
@@ -158,16 +146,6 @@ public class TrizettoEndpoint {
                 responses.add(f.get()[0]);
             }
         }
-
-//        IntStream.range(0, wrapper.getList().size()).parallel().forEach(i -> {
-//            Item item = wrapper.getList().get(i);
-//            List<ApiRequest.ServiceLine> line = new ArrayList<>();
-//            line.add(new ApiRequest.ServiceLine(item.getProcedureCode(), item.getItemNumber()));
-//            request.get(0).setLines(line);
-//            HttpEntity<List<ApiRequest>> entity = new HttpEntity<>(request, headers);
-//            ApiResponse[] ar = restTemplate.postForObject(trizettoUrl, entity, ApiResponse[].class);
-//            elapsedTime.addIncrement(System.currentTimeMillis());
-//            LOG.info("Elapsed time {} ms", elapsedTime.getLastIncrement());
 
 
         elapsedTime.setEndTime(System.currentTimeMillis());
@@ -208,4 +186,5 @@ public class TrizettoEndpoint {
             throw new RuntimeException(e);
         }
     }
+
 }
