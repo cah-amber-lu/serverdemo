@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
-import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -27,12 +26,12 @@ public class PrimaryController {
 
     private static final String PRODUCT_ID_PATH = "json/productid.txt";
 
-    private String productIds;
+    private List<String> productIds;
 
     @PostConstruct
     public void setup() throws IOException {
         if (new ClassPathResource(PRODUCT_ID_PATH).exists()) {
-            productIds = new String(Files.readAllBytes(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath()));
+            productIds = Files.readAllLines(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath());
         }
         else {
             throw new RuntimeException("Cannot find " + PRODUCT_ID_PATH + " to read");
@@ -45,7 +44,7 @@ public class PrimaryController {
     @GetMapping("/listingTrizetto")
     public String listingTrizetto(Model model) {
         final long startTime = System.currentTimeMillis();
-        List<Item> list = stringToList(productIds);
+        List<Item> list = stringsToItems(productIds);
         final long endTime = System.currentTimeMillis();
         final long totalTime = endTime - startTime;
         model.addAttribute("products", list);
@@ -55,23 +54,20 @@ public class PrimaryController {
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
-        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringToList(productIds)));
+        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringsToItems(productIds)));
         model.addAttribute("body", body);
         return "listingTrizetto2";
     }
 
     @GetMapping("/listingTrizetto3")
     public String listingTrizetto3(Model model) throws IOException, NullPointerException {
-        File file = new ClassPathResource("json/productid.txt").getFile();
-        String append = new String(Files.readAllBytes(file.toPath()));
-        List<Item> list = stringToList(append);
-        model.addAttribute("products", list);
+        model.addAttribute("products", stringsToItems(productIds));
         return "listingTrizetto3";
     }
 
     @GetMapping("/listingTrizetto4")
     public String listingTrizetto4(Model model) throws IOException, NullPointerException {
-        List<Item> list = stringToList(productIds);
+        List<Item> list = stringsToItems(productIds);
         List<ApiResponse> responses = te.singleRequest(new RequestWrapper(list));
         model.addAttribute("body", responses);
         return "listingTrizetto4";
@@ -83,7 +79,7 @@ public class PrimaryController {
     @GetMapping("/listing")
     public String listing(@RequestParam(name="name", required=false, defaultValue="User") String userName,
                           @RequestParam(name="productName", required=false, defaultValue="All") String productName,
-                          @RequestParam(name="numLoaded", required=false, defaultValue="10") String numLoaded,
+                          @RequestParam(name="numLoaded", required=false, defaultValue="10") int numLoaded,
                           Model model) {
 
         model.addAttribute("name", userName);
@@ -92,7 +88,7 @@ public class PrimaryController {
 
         model.addAttribute("numLoaded", numLoaded);
 
-        ProductBunch products = getProducts(Integer.parseInt(numLoaded));
+        ProductBunch products = getProducts(numLoaded);
 
         model.addAttribute("products", products.getProducts());
 
@@ -102,7 +98,7 @@ public class PrimaryController {
     @GetMapping("/listing2")
     public String listing2(@RequestParam(name="name", required=false, defaultValue="User") String userName,
                            @RequestParam(name="productName", required=false, defaultValue="All") String productName,
-                           @RequestParam(name="numLoaded", required=false, defaultValue="10") String numLoaded,
+                           @RequestParam(name="numLoaded", required=false, defaultValue="10") int numLoaded,
                            Model model) {
 
 
@@ -138,40 +134,20 @@ public class PrimaryController {
             System.out.println("Issue accessing the URL. Error message: " + e.getMessage());
             throw new RuntimeException("Cannot access products at this time.\n");
         }
-//        Random random = new Random();
-//        int numProducts = random.nextInt(9) + 2;
+
         return new ProductBunch(num, url);
     }
 
-    private List<Item> stringToList(String raw) {
+    private List<Item> stringsToItems(List<String> pids) {
         List<Item> list = new ArrayList<>();
-        String[] split = raw.split("\\r?\\n");
-
-        for (String s : split) {
-            String[] kvPair = s.split(",");
+        for (String pid : pids) {
+            String[] kvPair = pid.split(",");
             if (kvPair.length != 2) {
                 throw new RuntimeException("Incorrect parsing of values.");
             }
             list.add(new Item(kvPair[0], kvPair[1]));
-
         }
-        return list;
-    }
 
-    private List<ApiRequest.ServiceLine> stringToLine(String raw) {
-
-        List<ApiRequest.ServiceLine> list = new ArrayList<>();
-
-        String[] split = raw.split("\\r?\\n");
-
-        for (String s: split) {
-            String[] kvPair = s.split(",");
-            if (kvPair.length != 2) {
-                throw new RuntimeException("Incorrect parsing of values.");
-            }
-            ApiRequest.ServiceLine service = new ApiRequest.ServiceLine(kvPair[1], kvPair[0]);
-            list.add(service);
-        }
         return list;
     }
 
