@@ -30,22 +30,32 @@ public class PrimaryController {
 
     @PostConstruct
     public void setup() throws IOException {
-        productIds = Files.readAllLines(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath());
+        if (new ClassPathResource(PRODUCT_ID_PATH).exists()) {
+            productIds = Files.readAllLines(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath());
+        }
+        else {
+            throw new RuntimeException("Cannot find " + PRODUCT_ID_PATH + " to read");
+        }
     }
 
     @Autowired
     private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
-    public String listingTrizetto(Model model) throws IOException {
-
-        model.addAttribute("products", stringsToItems(productIds));
+    public String listingTrizetto(Model model) {
+        final long startTime = System.currentTimeMillis();
+        List<Item> list = stringsToItems(productIds);
+        final long endTime = System.currentTimeMillis();
+        final long totalTime = endTime - startTime;
+        model.addAttribute("products", list);
+        model.addAttribute("time", totalTime);
         return "listingTrizetto";
     }
 
     @GetMapping("/listingTrizetto2")
     public String listingTrizetto2(Model model) throws IOException, NullPointerException {
-        model.addAttribute("body", te.listingTrizetto(new RequestWrapper(stringsToItems(productIds))));
+        List<ApiResponse> body = te.listingTrizetto(new RequestWrapper(stringsToItems(productIds)));
+        model.addAttribute("body", body);
         return "listingTrizetto2";
     }
 
@@ -55,10 +65,11 @@ public class PrimaryController {
         return "listingTrizetto3";
     }
 
-
     @GetMapping("/listingTrizetto4")
     public String listingTrizetto4(Model model) throws IOException, NullPointerException {
-        model.addAttribute("body", te.listingTrizetto(new RequestWrapper(stringsToItems(productIds))));
+        List<Item> list = stringsToItems(productIds);
+        List<ApiResponse> responses = te.singleRequest(new RequestWrapper(list));
+        model.addAttribute("body", responses);
         return "listingTrizetto4";
 
     }
