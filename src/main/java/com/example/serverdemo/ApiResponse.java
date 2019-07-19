@@ -1,6 +1,7 @@
 package com.example.serverdemo;
 
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,6 +16,16 @@ public class ApiResponse {
     private String message;                     // Message.
     private List<ServiceLine> lines;            // Array of ServiceLine objects.
     private String error;                       // Description of error.
+
+    public ApiResponse() {
+        this.planName = "Error";
+        this.taxId = "N/A";
+        this.feeScheduleEffectiveDate = "Not found";
+        this.feeScheduleTerminationDate = "Not found";
+        this.message = "";
+        this.lines = new ArrayList<>();
+        this.error = "Was not able to successfully acquire the API response.";
+    }
 
     public String getPlanName() {
         return planName;

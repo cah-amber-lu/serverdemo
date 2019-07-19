@@ -4,7 +4,9 @@ import com.example.serverdemo.OldMethods.ProductBunch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,17 +14,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 @Controller
@@ -30,19 +28,30 @@ public class PrimaryController {
 
     private static final Logger LOG = LoggerFactory.getLogger(PrimaryController.class);
 
+    // File that keeps track of all API requests by a controller.
     private static final String LOG_FILE_PATH = "RequestLog.txt";
 
+    // File that contains default account information.
     private static final String PRODUCT_ID_PATH = "json/productid.txt";
 
+    // List of Product ID and Procedure Codes per each product
     private List<String> productIds;
+
+    @Value("classpath:json/productid.txt")
+    private Resource productIdResource;
+
+    @Value("Requestlog.txt")
+    private Resource requestLogResource;
 
     @PostConstruct
     public void setup() throws IOException {
-        if (new ClassPathResource(PRODUCT_ID_PATH).exists()) {
-            productIds = Files.readAllLines(new ClassPathResource(PRODUCT_ID_PATH).getFile().toPath());
-        }
-        else {
-            throw new RuntimeException("Cannot find " + PRODUCT_ID_PATH + " to read");
+        // Gets the default data
+        productIds = new ArrayList<>();
+        try (Scanner scanner = new Scanner(productIdResource.getInputStream())) {
+            while (scanner.hasNext()) {
+                productIds.add(scanner.nextLine());
+                LOG.info(productIds.get(productIds.size() - 1));
+            }
         }
     }
 
@@ -50,7 +59,7 @@ public class PrimaryController {
     private TrizettoEndpoint te;
 
     @GetMapping("/listingTrizetto")
-    public String listingTrizetto(Model model) throws IOException {
+    public String listingTrizetto(Model model) {
         writeToFile("Page 1");
         List<Item> list = stringsToItems(productIds);
         model.addAttribute("products", list);
@@ -66,7 +75,7 @@ public class PrimaryController {
     }
 
     @GetMapping("/listingTrizetto3")
-    public String listingTrizetto3(Model model) throws IOException, NullPointerException {
+    public String listingTrizetto3(Model model) throws NullPointerException {
         writeToFile("Page 3");
         model.addAttribute("products", stringsToItems(productIds));
         return "listingTrizetto3";
@@ -83,17 +92,27 @@ public class PrimaryController {
 
     }
 
-    private void writeToFile(String name) throws IOException {
-        BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE_PATH, true));
-        try {
+    /**
+     * Helper function which records when & which listing make a call to Trizetto.
+     * @param name: A string indicating which made the call to Trizetto
+     */
+    private void writeToFile(String name) {
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(LOG_FILE_PATH, true))) {
             writer.append("--\r\n");
             writer.append(name).append(" made a call to the proxy at ")
                     .append(new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").format(Calendar.getInstance().getTime()));
-        } finally {
-            writer.close();
+        } catch (IOException e) {
+            // Catch errors with opening the file
+            LOG.debug("Error writing file: " + e.getLocalizedMessage());
         }
     }
 
+    /**
+     * Helper function that converts Strings of numbers into Item objects
+     * @param pids: List of Strings in ID number, procedure code format
+     * @return a list of Item objects
+     */
     private List<Item> stringsToItems(List<String> pids) {
         List<Item> list = new ArrayList<>();
         for (String pid : pids) {
